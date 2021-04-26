@@ -1,30 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="?attr/actionBarSize">
+    android:paddingTop="?attr/actionBarSize"
+    >
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/nav_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:backgroundTint="@color/teal_700"
+        app:fabCradleMargin="10dp"
+        app:fabCradleRoundedCornerRadius="100dp"
+        app:fabCradleVerticalOffset="10dp"
+        >
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigationView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/transparent"
+            app:elevation="0dp"
+            android:alpha="0.5"
+            app:menu="@menu/bottom_nav_menu"
+            />
+
+    </com.google.android.material.bottomappbar.BottomAppBar>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/nav_view"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/ic_baseline_camera_alt_24" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        android:background="?android:attr/windowBackground"
-        app:menu="@menu/bottom_nav_menu" />
+        android:contentDescription="@string/app_name"
+        app:backgroundTint="#809800"
+        app:layout_anchor="@id/nav_view"
+        android:src="@android:drawable/ic_menu_camera"/>
 
     <fragment
         android:id="@+id/nav_host_fragment"
@@ -38,4 +52,4 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
