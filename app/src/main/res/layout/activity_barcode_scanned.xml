@@ -8,8 +8,7 @@
         android:id="@+id/barcodeImage"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/barcode" />
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:id="@+id/scannedText"
@@ -21,6 +20,18 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/itemName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scannedText"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="Item Name"
+        android:textColor="@color/black"
+        android:textSize="26sp" />
+
 
 
 </RelativeLayout>

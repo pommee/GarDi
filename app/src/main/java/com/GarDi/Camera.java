@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.GarDi.Models.RequestJSoup;
 import com.GarDi.Models.Singleton;
 import com.clarifai.channel.ClarifaiChannel;
 import com.clarifai.credentials.ClarifaiCallCredentials;
@@ -39,6 +41,11 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.protobuf.ByteString;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -96,7 +103,7 @@ public class Camera extends AppCompatActivity {
                 .build();
 
         cameraSource = new CameraSource.Builder(this, barcodeDetector)
-                .setRequestedPreviewSize(1920, 1080)
+                .setRequestedPreviewSize(getScreenHeight(), getScreenWidth())
                 .setAutoFocusEnabled(true)
                 .build();
 
@@ -146,16 +153,49 @@ public class Camera extends AppCompatActivity {
                         Singleton.getInstance().setScannedText(barcodeData);
                         Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
                         startActivity(intent);
+                        try {
+                            Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
+                            Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         barcodeData = barcodes.valueAt(0).displayValue;
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
                         Singleton.getInstance().setScannedText(barcodeData);
                         Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
                         startActivity(intent);
+                        try {
+                            Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
+                            Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         });
+    }
+
+    private static Bitmap generateBarcodeFromString(String barcodeText) {
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            BitMatrix bitMatrix = multiFormatWriter.encode(barcodeText, BarcodeFormat.CODABAR, getScreenWidth(), 300);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            return bitmap;
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
 
