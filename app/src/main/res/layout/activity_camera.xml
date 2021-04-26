@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="620dp"
-        android:backgroundTint="#555555"
+        android:backgroundTint="#80555555"
         app:backgroundTint="@color/black"
         />
 

@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
 public class Camera extends AppCompatActivity {
 
 
@@ -67,6 +68,7 @@ public class Camera extends AppCompatActivity {
     private ToneGenerator toneGen1;
     private String barcodeData;
     private FloatingActionButton button;
+    private V2Grpc.V2BlockingStub stub;
 
 
     @Override
@@ -222,10 +224,10 @@ public class Camera extends AppCompatActivity {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 pathNew = Paths.get(getRealPathFromUri(getApplicationContext(), photo));
             }
-
-
-            V2Grpc.V2BlockingStub stub = V2Grpc.newBlockingStub(ClarifaiChannel.INSTANCE.getInsecureGrpcChannel())
-                    .withCallCredentials(new ClarifaiCallCredentials("28f7631e75464771b2f266ff6e0053e0"));
+            if (stub == null) {
+                stub = V2Grpc.newBlockingStub(ClarifaiChannel.INSTANCE.getInsecureGrpcChannel())
+                        .withCallCredentials(new ClarifaiCallCredentials("28f7631e75464771b2f266ff6e0053e0"));
+            }
 
             MultiOutputResponse response = null;
 
