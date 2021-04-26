@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "165191525566",
+    "project_id": "gardi-876c1",
+    "storage_bucket": "gardi-876c1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:165191525566:android:50126cddf16119634eaaef",
+        "android_client_info": {
+          "package_name": "com.GarDi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "165191525566-8u89riii2ljtcq41r5a6fad1j2q87md4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe2QpCsoqNKtvQTAX26HxWB393NKyiCwQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "165191525566-8u89riii2ljtcq41r5a6fad1j2q87md4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
