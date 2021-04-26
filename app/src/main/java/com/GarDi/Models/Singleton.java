@@ -7,8 +7,7 @@ import java.util.ArrayList;
 public class Singleton {
 
     private static Singleton instance = null;
-    String scannedText;
-    String itemName;
+    String itemName, scannedText, itemImage;
     Bitmap barcode;
 
     public Singleton() {
@@ -19,6 +18,14 @@ public class Singleton {
             instance = new Singleton();
         }
         return (instance);
+    }
+
+    public String getItemImage() {
+        return itemImage;
+    }
+
+    public void setItemImage(String itemImage) {
+        this.itemImage = itemImage;
     }
 
     public static void setInstance(Singleton instance) {
