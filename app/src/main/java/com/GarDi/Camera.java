@@ -252,7 +252,6 @@ public class Camera extends AppCompatActivity {
             for (Concept c : response.getOutputs(0).getData().getConceptsList()) {
                 list.add(String.format("%12s: %,.2f", c.getName(), c.getValue()));
             }
-
             Intent intent = new Intent(Camera.this, InfoActivity.class);
             intent.putExtra("LIST", (Serializable) list);
             startActivity(intent);
@@ -260,7 +259,6 @@ public class Camera extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
         }
-
     }
 
     public static String getRealPathFromUri(Context context, Uri contentUri) {
