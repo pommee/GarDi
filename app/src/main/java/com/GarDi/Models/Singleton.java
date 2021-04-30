@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class Singleton {
 
     private static Singleton instance = null;
-    String itemName, scannedText, itemImage;
+    String itemName, scannedText, itemImage, materialOfProduct;
     Bitmap barcode;
 
     public Singleton() {
@@ -54,5 +54,13 @@ public class Singleton {
 
     public void setBarcode(Bitmap barcode) {
         this.barcode = barcode;
+    }
+
+    public String getMaterialOfProduct() {
+        return materialOfProduct;
+    }
+
+    public void setMaterialOfProduct(String materialOfProduct) {
+        this.materialOfProduct = materialOfProduct;
     }
 }

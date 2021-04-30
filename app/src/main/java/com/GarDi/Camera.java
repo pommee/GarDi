@@ -47,9 +47,16 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -170,6 +177,7 @@ public class Camera extends AppCompatActivity {
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
                             Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
+                            Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -177,6 +185,37 @@ public class Camera extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private String retrieveMaterialFromBarcode(String barcodeData) {    // Takes the barcode and returns the materials of the product :)
+        String material = null;
+        String url = "https://world.openfoodfacts.org/api/v0/product/" + barcodeData + ".json";
+
+        JSONParser parser = new JSONParser();
+
+        try {
+            URL oracle = new URL(url); // URL to Parse
+            URLConnection yc = oracle.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+
+            String inputLine;
+
+            if((inputLine = in.readLine()) != null) {
+                JSONObject jsonObject = (JSONObject) parser.parse(inputLine);
+                JSONObject product;
+
+                if(jsonObject.get("product") != null){
+                    product = (JSONObject) jsonObject.get("product");
+                    material = product.get("packaging").toString();
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Something went wrong retrieving materials", Toast.LENGTH_LONG).show();
+            return "No materials found";
+        }
+        return material;
     }
 
     private static Bitmap generateBarcodeFromString(String barcodeText) {
