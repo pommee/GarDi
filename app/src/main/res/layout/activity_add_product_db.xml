@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/barcodeImage"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/scannedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/barcodeImage"
+        android:layout_centerHorizontal="true"
+        android:text="Scanned Code"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/scannedText"
+        android:layout_marginBottom="-30dp"
+        android:backgroundTint="@color/discordGray"
+        app:cardCornerRadius="30dp">
+
+        <ImageView
+            android:id="@+id/itemImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/productName"
+            android:layout_width="364dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:ems="10"
+            android:hint="Product Name:"
+            android:inputType="textPersonName"
+            android:textSize="20sp"
+            android:textColor="@color/white"/>
+
+        <RadioGroup
+            android:id="@+id/materialGroup"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+
+            <CheckBox
+                android:id="@+id/plastic"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Plastic"
+                android:textSize="20dp"/>
+
+            <CheckBox
+                android:id="@+id/metal"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Metal"
+                android:textSize="20dp"/>
+
+            <CheckBox
+                android:id="@+id/carton"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Carton"
+                android:textSize="20dp"/>
+
+            <CheckBox
+                android:id="@+id/glass"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Glass"
+                android:textSize="20dp"/>
+
+            <CheckBox
+                android:id="@+id/paperPackaging"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Paper Packaging"
+                android:textSize="20dp"/>
+
+            <CheckBox
+                android:id="@+id/combustible"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Combustible"
+                android:textSize="20dp"/>
+
+            <CheckBox
+                android:id="@+id/plasticPackaging"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Plastic Packaging"
+                android:textSize="20dp"/>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="40dp"
+            android:backgroundTint="#008000"
+            android:text="Add"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+
+
+    </androidx.cardview.widget.CardView>
+
+
+</RelativeLayout>

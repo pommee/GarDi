@@ -2,6 +2,7 @@ package com.GarDi;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -20,6 +21,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import androidx.annotation.WorkerThread;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -47,6 +50,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import org.apache.commons.math3.analysis.function.Sin;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -187,6 +191,7 @@ public class Camera extends AppCompatActivity {
         });
     }
 
+
     private String retrieveMaterialFromBarcode(String barcodeData) {    // Takes the barcode and returns the materials of the product :)
         String material = null;
         String url = "https://world.openfoodfacts.org/api/v0/product/" + barcodeData + ".json";
@@ -206,14 +211,16 @@ public class Camera extends AppCompatActivity {
 
                 if(jsonObject.get("product") != null){
                     product = (JSONObject) jsonObject.get("product");
-                    material = product.get("packaging").toString();
+                    if (product.get("packaging") != null) { // If no packaging exists in DB
+                        material = product.get("packaging").toString();
+                    } else {
+                        material = "No materials found";
+                    }
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Something went wrong retrieving materials", Toast.LENGTH_LONG).show();
-            return "No materials found";
         }
         return material;
     }
