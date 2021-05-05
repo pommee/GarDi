@@ -5,7 +5,7 @@ import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.GarDi.Models.Singleton
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
 //import com.google.firebase.ktx.Firebase
@@ -38,7 +38,6 @@ class AddProductToDB : AppCompatActivity() {
             if (productName!!.text.length in 3..39) {   // If productName is correct
                 getSelectedMaterials()
                 if (materials!!.isNotEmpty()) { // If materials have been checked
-
                     storeProductToFirebase()
                     Toast.makeText(
                         applicationContext,
@@ -65,8 +64,7 @@ class AddProductToDB : AppCompatActivity() {
     }
 
     private fun storeProductToFirebase() {
-
-        val db = Firebase.firestore
+        val db = FirebaseFirestore.getInstance()
          //val db = Firebase.firestore
          val product = hashMapOf(
              "barcode" to scannedText!!.text,

@@ -29,7 +29,8 @@ class BarcodeScanned : AppCompatActivity() {
             startActivity(intent)
         }
 
-        if (Singleton.getInstance().materialOfProduct.equals("No materials found")) {
+        println(Singleton.getInstance().materialOfProduct)
+        if (Singleton.getInstance().materialOfProduct == "No materials found") {
             promptForAdding()
         }
     }

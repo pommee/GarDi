@@ -217,6 +217,10 @@ public class Camera extends AppCompatActivity {
                         material = "No materials found";
                     }
                 }
+//                La till denna else för att se till så att aldrig null returneras.
+                else {
+                    material = "No materials found";
+                }
             }
 
         } catch (Exception e) {
