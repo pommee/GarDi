@@ -21,18 +21,21 @@ class BarcodeScanned : AppCompatActivity() {
         setContentView(R.layout.activity_barcode_scanned)
         initID()
         scannedText!!.text = Singleton.getInstance().scannedText
-        itemName!!.text = Singleton.getInstance().itemName
+        if (Singleton.getInstance().itemName == "") {
+            itemName!!.text = "No name found"
+        } else {
+            itemName!!.text = Singleton.getInstance().itemName
+        }
         barcodeImage!!.setImageBitmap(Singleton.getInstance().barcode)
-        material!!.text = Singleton.getInstance().materialOfProduct;
         okButton!!.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
-
-        println(Singleton.getInstance().materialOfProduct)
+        material!!.text = Singleton.getInstance().materialOfProduct
         if (Singleton.getInstance().materialOfProduct == "No materials found") {
             promptForAdding()
         }
+
     }
 
     private fun initID() {

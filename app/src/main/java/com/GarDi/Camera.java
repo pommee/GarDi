@@ -164,11 +164,13 @@ public class Camera extends AppCompatActivity {
                         barcodeData = barcodes.valueAt(0).email.toString();
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
                         Singleton.getInstance().setScannedText(barcodeData);
+                        Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
+                        Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
                         Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
                         startActivity(intent);
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
-                            Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -176,12 +178,12 @@ public class Camera extends AppCompatActivity {
                         barcodeData = barcodes.valueAt(0).displayValue;
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
                         Singleton.getInstance().setScannedText(barcodeData);
+                        Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
+                        Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
                         Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
                         startActivity(intent);
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
-                            Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
-                            Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -193,7 +195,7 @@ public class Camera extends AppCompatActivity {
 
 
     private String retrieveMaterialFromBarcode(String barcodeData) {    // Takes the barcode and returns the materials of the product :)
-        String material = null;
+        String material = "No materials found";
         String url = "https://world.openfoodfacts.org/api/v0/product/" + barcodeData + ".json";
 
         JSONParser parser = new JSONParser();
@@ -213,16 +215,9 @@ public class Camera extends AppCompatActivity {
                     product = (JSONObject) jsonObject.get("product");
                     if (product.get("packaging") != null) { // If no packaging exists in DB
                         material = product.get("packaging").toString();
-                    } else {
-                        material = "No materials found";
                     }
                 }
-//                La till denna else för att se till så att aldrig null returneras.
-                else {
-                    material = "No materials found";
-                }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

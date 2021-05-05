@@ -1,12 +1,13 @@
 package com.GarDi
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.GarDi.Models.Product
 import com.GarDi.Models.Singleton
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 
 //import com.google.firebase.ktx.Firebase
 
@@ -23,7 +24,7 @@ class AddProductToDB : AppCompatActivity() {
     private var combustibleBox: CheckBox? = null
     private var plasticPackagingBox: CheckBox? = null
 
-    private var materials : ArrayList<String> ? = null
+    private var materialList: List<String>? = null
 
     private var addButton: Button? = null
 
@@ -37,14 +38,15 @@ class AddProductToDB : AppCompatActivity() {
 
             if (productName!!.text.length in 3..39) {   // If productName is correct
                 getSelectedMaterials()
-                if (materials!!.isNotEmpty()) { // If materials have been checked
+                if (materialList!!.isNotEmpty()) { // If materials have been checked
                     storeProductToFirebase()
                     Toast.makeText(
                         applicationContext,
                         "Information should now be saved in firebase database",
                         Toast.LENGTH_SHORT
                     ).show()
-
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
                 } else {
                     Toast.makeText(
                         applicationContext,
@@ -65,23 +67,19 @@ class AddProductToDB : AppCompatActivity() {
 
     private fun storeProductToFirebase() {
         val db = FirebaseFirestore.getInstance()
-         //val db = Firebase.firestore
-         val product = hashMapOf(
-             "barcode" to scannedText!!.text,
-             "productName" to productName!!.text,
-             "materials" to materials
-         )
 
-         db.collection("Products").add(product)
-             .addOnSuccessListener { documentReference ->
-                 Log.d(
-                     "MyTag",
-                     "DocumentSnapshot added with ID: ${documentReference.id}"
-                 )
-             }
-             .addOnFailureListener { e ->
-                 Log.w("MyTag", "Error adding document", e)
-             }
+        val product =
+            Product(scannedText!!.text.toString(), productName!!.text.toString(), materialList)
+        db.collection("Products").add(product)
+            .addOnSuccessListener { documentReference ->
+                Log.d(
+                    "MyTag",
+                    "DocumentSnapshot added with ID: ${documentReference.id}"
+                )
+            }
+            .addOnFailureListener { e ->
+                Log.w("MyTag", "Error adding document", e)
+            }
 
 
     }
@@ -101,27 +99,28 @@ class AddProductToDB : AppCompatActivity() {
     }
 
     private fun getSelectedMaterials() {
-        materials = ArrayList()
+        val myList = ArrayList<String>()
         if (plasticBox!!.isChecked) {
-            materials!!.add("plastic")
+            myList.add("plastic")
         }
         if (metalBox!!.isChecked) {
-            materials!!.add("metal")
+            myList.add("metal")
         }
         if (cartonBox!!.isChecked) {
-            materials!!.add("carton")
+            myList.add("carton")
         }
         if (glassBox!!.isChecked) {
-            materials!!.add("glass")
+            myList.add("glass")
         }
         if (paperPackagingBox!!.isChecked) {
-            materials!!.add("paper packaging")
+            myList.add("paper packaging")
         }
         if (combustibleBox!!.isChecked) {
-            materials!!.add("combustible")
+            myList.add("combustible")
         }
         if (plasticPackagingBox!!.isChecked) {
-            materials!!.add("plastic packaging")
+            myList.add("plastic packaging")
         }
+        materialList = myList.toList()
     }
 }
