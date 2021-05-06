@@ -12,8 +12,10 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseArray;
@@ -25,19 +27,10 @@ import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import com.GarDi.Models.RequestJSoup;
 import com.GarDi.Models.Singleton;
-import com.clarifai.channel.ClarifaiChannel;
-import com.clarifai.credentials.ClarifaiCallCredentials;
-import com.clarifai.grpc.api.Concept;
-import com.clarifai.grpc.api.Data;
-import com.clarifai.grpc.api.Image;
-import com.clarifai.grpc.api.Input;
-import com.clarifai.grpc.api.MultiOutputResponse;
-import com.clarifai.grpc.api.PostModelOutputsRequest;
-import com.clarifai.grpc.api.V2Grpc;
-import com.clarifai.grpc.api.status.StatusCode;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -50,12 +43,13 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import org.apache.commons.math3.analysis.function.Sin;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
@@ -67,6 +61,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import clarifai2.api.ClarifaiBuilder;
+import clarifai2.api.ClarifaiClient;
+import clarifai2.dto.input.ClarifaiInput;
+import clarifai2.dto.model.output.ClarifaiOutput;
+import clarifai2.dto.prediction.Concept;
 
 
 public class Camera extends AppCompatActivity {
@@ -79,7 +78,7 @@ public class Camera extends AppCompatActivity {
     private ToneGenerator toneGen1;
     private String barcodeData;
     private FloatingActionButton button;
-    private V2Grpc.V2BlockingStub stub;
+    public String photoPath = null;
 
 
     @Override
@@ -97,14 +96,35 @@ public class Camera extends AppCompatActivity {
         button.setOnClickListener(v -> {
             if (cameraSource != null) {
                 cameraSource.takePicture(null, data -> {
-                    Bitmap picture = BitmapFactory.decodeByteArray(data, 0, data.length);
-                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                    picture.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                    String path = MediaStore.Images.Media.insertImage(getContentResolver(), picture, "Title", null);
-                    Uri imageUri = Uri.parse(path);
-                    String image = imageUri.toString();
 
-                    getDetails(image);
+                    File photoFile;
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+                    if (bitmap != null) {
+                        Log.e("TAG", bitmap.toString() + "nr 2");
+                        try {
+                            File storageDir = getFilesDir();
+                            photoFile = File.createTempFile("SNAPSHOT", ".jpg", storageDir);
+                            photoPath = photoFile.getAbsolutePath();
+
+                            FileOutputStream fileOutputStream = new FileOutputStream(photoFile);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+
+                            if (photoPath != null) {
+                                Intent intent = new Intent(Camera.this, InfoActivity.class);
+                                intent.putExtra("photoPath", photoPath);
+                                startActivity(intent);
+                                Toast.makeText(getApplicationContext(), "processing picture, please hold", Toast.LENGTH_LONG).show();
+                                photoPath = null;
+                            }else{
+                                Toast.makeText(getApplicationContext(), "empty photoPath, try again", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception exception) {
+                            Toast.makeText(getApplicationContext(), "Error saving: " + exception.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    }
                 });
             } else {
                 Toast.makeText(getApplicationContext(), "Var vänlig och försök igen", Toast.LENGTH_SHORT).show();
@@ -123,8 +143,9 @@ public class Camera extends AppCompatActivity {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
+                Log.e("TAG", "surface created");
                 try {
-                    if (ActivityCompat.checkSelfPermission(Camera.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(Camera.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && cameraSource != null) {
                         cameraSource.start(surfaceView.getHolder());
                     } else {
                         ActivityCompat.requestPermissions(Camera.this, new
@@ -140,11 +161,17 @@ public class Camera extends AppCompatActivity {
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                Log.e("TAG", "surface changed");
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                cameraSource.stop();
+                Log.e("TAG", "surface destroyed");
+
+                if (cameraSource != null) {
+                    cameraSource.release();
+                    cameraSource = null;
+                }
             }
         });
 
@@ -207,11 +234,11 @@ public class Camera extends AppCompatActivity {
 
             String inputLine;
 
-            if((inputLine = in.readLine()) != null) {
+            if ((inputLine = in.readLine()) != null) {
                 JSONObject jsonObject = (JSONObject) parser.parse(inputLine);
                 JSONObject product;
 
-                if(jsonObject.get("product") != null){
+                if (jsonObject.get("product") != null) {
                     product = (JSONObject) jsonObject.get("product");
                     if (product.get("packaging") != null) { // If no packaging exists in DB
                         material = product.get("packaging").toString();
@@ -250,78 +277,11 @@ public class Camera extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Objects.requireNonNull(getSupportActionBar()).hide();
-        cameraSource.release();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Objects.requireNonNull(getSupportActionBar()).hide();
-        initialiseDetectorsAndSources();
     }
-
-    public void getDetails(String image) {
-        Path pathNew = null;
-        try {
-            Uri photo = Uri.parse(image);
-            Log.i("URI", image);
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                pathNew = Paths.get(getRealPathFromUri(getApplicationContext(), photo));
-            }
-            if (stub == null) {
-                stub = V2Grpc.newBlockingStub(ClarifaiChannel.INSTANCE.getInsecureGrpcChannel())
-                        .withCallCredentials(new ClarifaiCallCredentials("28f7631e75464771b2f266ff6e0053e0"));
-            }
-
-            MultiOutputResponse response = null;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                response = stub.postModelOutputs(
-                        PostModelOutputsRequest.newBuilder()
-                                .setModelId("aaa03c23b3724a16a56b629203edc62c")
-                                .addInputs(
-                                        Input.newBuilder().setData(
-                                                Data.newBuilder().setImage(Image.newBuilder().setBase64(ByteString.copyFrom(Files.readAllBytes(pathNew)))
-                                                )
-                                        )
-                                )
-                                .build()
-                );
-            }
-
-            if (response.getStatus().getCode() != StatusCode.SUCCESS) {
-                throw new RuntimeException("Request failed, status: " + response.getStatus());
-            }
-
-            List<String> list = new ArrayList<>();
-
-            for (Concept c : response.getOutputs(0).getData().getConceptsList()) {
-                list.add(String.format("%12s: %,.2f", c.getName(), c.getValue()));
-            }
-            Intent intent = new Intent(Camera.this, InfoActivity.class);
-            intent.putExtra("LIST", (Serializable) list);
-            startActivity(intent);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public static String getRealPathFromUri(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            assert cursor != null;
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
 }
