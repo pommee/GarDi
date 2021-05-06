@@ -2,6 +2,7 @@ package com.GarDi;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -18,14 +19,18 @@ import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 
 public class InfoActivity extends AppCompatActivity {
+    List<Float> datumvalueList = new ArrayList<>();
     List<String> resList = new ArrayList<>();
     String photoPath = null;
     ArrayAdapter<String> arrayAdapter = null;
+    List<String> categories = new ArrayList<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
-
+        categories.add("geometric");
+        categories.add("vector");
+        categories.add("design");
         photoPath = (String) getIntent().getSerializableExtra("photoPath");
         ListView lv = (ListView) findViewById(R.id.list_view);
         arrayAdapter= new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,resList);
@@ -45,10 +50,22 @@ public class InfoActivity extends AppCompatActivity {
                             .withInputs(ClarifaiInput.forImage(image)).executeSync().get();
 // Check if Clarifai thinks the photo contains the object we are looking for
 
-                for (ClarifaiOutput<Concept> result : predictionResults)
-                    for (Concept datum : result.data()){
-                        resList.add(String.format("%12s: %,.2f", datum.name(), datum.value()));
+                for (ClarifaiOutput<Concept> result : predictionResults) {
+                    for (Concept datum : result.data()) {
+                        int i = 0;
+                        while (i < categories.size()) {
+                            Log.d("myTag", datum.name() + "" + categories.get(i));
+                                if (datum.name().matches(categories.get(i))) {
+                                    resList.add(String.format("%12s: %,.2f", datum.name(), datum.value()));
+                                    i++;
+                                } else {
+                                    i++;
+                                }
+
+                        }
+
                     }
+                }
                 return true;
             }
             return false;
