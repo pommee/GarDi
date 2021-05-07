@@ -65,23 +65,22 @@ class AddProductToDB : AppCompatActivity() {
         }
     }
 
-    private fun storeProductToFirebase() {
+    private fun storeProductToFirebase() {  // Currently writing null values to firebase
         val db = FirebaseFirestore.getInstance()
 
         val product =
             Product(scannedText!!.text.toString(), productName!!.text.toString(), materialList)
-        db.collection("Products").add(product)
+        Log.d("MyTag", product.barcode + " " + product.productName + " " + product.materialList.toString())
+        db.collection("Products").document(scannedText!!.text.toString()).set(product)
             .addOnSuccessListener { documentReference ->
                 Log.d(
                     "MyTag",
-                    "DocumentSnapshot added with ID: ${documentReference.id}"
+                    "DocumentSnapshot added with ID: " + scannedText!!.text.toString()
                 )
             }
             .addOnFailureListener { e ->
                 Log.w("MyTag", "Error adding document", e)
             }
-
-
     }
 
     private fun initID() {

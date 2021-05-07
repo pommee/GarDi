@@ -1,33 +1,22 @@
 package com.GarDi;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
 
 import com.GarDi.Models.RequestJSoup;
 import com.GarDi.Models.Singleton;
@@ -36,7 +25,6 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.protobuf.ByteString;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -47,29 +35,16 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import clarifai2.api.ClarifaiBuilder;
-import clarifai2.api.ClarifaiClient;
-import clarifai2.dto.input.ClarifaiInput;
-import clarifai2.dto.model.output.ClarifaiOutput;
-import clarifai2.dto.prediction.Concept;
 
 
 public class Camera extends AppCompatActivity {
-
 
     private SurfaceView surfaceView;
     private BarcodeDetector barcodeDetector;
@@ -79,6 +54,7 @@ public class Camera extends AppCompatActivity {
     private String barcodeData;
     private FloatingActionButton button;
     public String photoPath = null;
+    private boolean barcodeScanned;
 
 
     @Override
@@ -88,6 +64,7 @@ public class Camera extends AppCompatActivity {
         toneGen1 = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
         surfaceView = findViewById(R.id.cameraView);
         button = findViewById(R.id.cameraButton);
+        barcodeScanned = false; // Default
         initialiseDetectorsAndSources();
     }
 
@@ -155,8 +132,6 @@ public class Camera extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
 
             @Override
@@ -179,7 +154,7 @@ public class Camera extends AppCompatActivity {
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
-                Toast.makeText(getApplicationContext(), "Var vänlig och försök igen", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Var vänlig och försök igen", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -193,27 +168,27 @@ public class Camera extends AppCompatActivity {
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
                         Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
-                        Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
-                        startActivity(intent);
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
-
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
+                        startActivity(intent);
+
                     } else {
                         barcodeData = barcodes.valueAt(0).displayValue;
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
                         Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
-                        Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
-                        startActivity(intent);
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
+                        startActivity(intent);
                     }
                 }
             }

@@ -61,4 +61,6 @@ class BarcodeScanned : AppCompatActivity() {
         alert.setTitle("Product not found!")
         alert.show()
     }
+
+    //TODO Override onbackpressed to start camera activity
 }
