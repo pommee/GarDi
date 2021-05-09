@@ -2,11 +2,13 @@ package com.GarDi
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.GarDi.Models.MaterialHandler
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -32,5 +34,6 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, Camera::class.java)
             startActivity(intent)
         }
+        Log.d("MyTag", MaterialHandler.findSortingFromMaterial("Plastic"))
     }
 }
