@@ -52,18 +52,23 @@ public class InfoActivity extends AppCompatActivity {
 
                 for (ClarifaiOutput<Concept> result : predictionResults) {
                     for (Concept datum : result.data()) {
+
+
+                        resList.add(String.format("%12s: %,.2f", datum.name(), datum.value()));
+
+                        /*
                         int i = 0;
                         while (i < categories.size()) {
                             Log.d("myTag", datum.name() + "" + categories.get(i));
-                                if (datum.name().matches(categories.get(i))) {
-                                    resList.add(String.format("%12s: %,.2f", datum.name(), datum.value()));
-                                    i++;
-                                } else {
-                                    i++;
-                                }
+                            if (datum.name().matches(categories.get(i))) {
+
+                                i++;
+                            } else {
+                                i++;
+                            }
 
                         }
-
+*/
                     }
                 }
                 return true;
