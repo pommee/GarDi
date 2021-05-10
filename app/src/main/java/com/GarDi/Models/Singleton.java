@@ -9,6 +9,7 @@ public class Singleton {
     private static Singleton instance = null;
     String itemName, scannedText, itemImage, materialOfProduct;
     Bitmap barcode;
+    Product product;
 
     public Singleton() {
     }
@@ -62,5 +63,13 @@ public class Singleton {
 
     public void setMaterialOfProduct(String materialOfProduct) {
         this.materialOfProduct = materialOfProduct;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }
