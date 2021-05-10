@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.GarDi.Models.MaterialHandler
 import com.GarDi.Models.Singleton
 
 class BarcodeScanned : AppCompatActivity() {
@@ -15,6 +16,7 @@ class BarcodeScanned : AppCompatActivity() {
     private var material: TextView? = null
     private var barcodeImage: ImageView? = null
     private var okButton: Button? = null
+    private var sorting: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +37,17 @@ class BarcodeScanned : AppCompatActivity() {
         if (Singleton.getInstance().materialOfProduct == "No materials found") {
             promptForAdding()
         }
+        sorting!!.text = "Sorting: \n" + getSortingAlternatives()
+    }
 
+    private fun getSortingAlternatives() : String {
+        var result = "";
+        val materials = Singleton.getInstance().materialOfProduct.split(", ")
+        for (item in materials) {
+            result += MaterialHandler.findSortingFromMaterial(item)
+            result += " "
+        }
+        return result
     }
 
     private fun initID() {
@@ -44,6 +56,7 @@ class BarcodeScanned : AppCompatActivity() {
         barcodeImage = findViewById(R.id.barcodeImage)
         material = findViewById(R.id.material)
         okButton = findViewById(R.id.okButton)
+        sorting = findViewById(R.id.sorting)
     }
 
     private fun promptForAdding() {
@@ -62,5 +75,8 @@ class BarcodeScanned : AppCompatActivity() {
         alert.show()
     }
 
-    //TODO Override onbackpressed to start camera activity
+    override fun onBackPressed() {
+        val intent = Intent(this, Camera::class.java)
+        startActivity(intent)
+    }
 }

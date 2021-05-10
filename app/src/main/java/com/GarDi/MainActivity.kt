@@ -34,6 +34,5 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, Camera::class.java)
             startActivity(intent)
         }
-        Log.d("MyTag", MaterialHandler.findSortingFromMaterial("Plastic"))
     }
 }

@@ -57,7 +57,20 @@
             android:layout_marginEnd="20dp"
             android:textColor="@color/white"
             android:textSize="26sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:hint="Material"/>
+
+        <TextView
+            android:id="@+id/sorting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="200dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/white"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:text="Sorting:" />
 
         <Button
             android:id="@+id/okButton"

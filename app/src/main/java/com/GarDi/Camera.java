@@ -15,16 +15,25 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.GarDi.Models.Product;
 import com.GarDi.Models.RequestJSoup;
 import com.GarDi.Models.Singleton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -42,6 +51,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 
 public class Camera extends AppCompatActivity {
@@ -95,7 +105,7 @@ public class Camera extends AppCompatActivity {
                                 startActivity(intent);
                                 Toast.makeText(getApplicationContext(), "processing picture, please hold", Toast.LENGTH_LONG).show();
                                 photoPath = null;
-                            }else{
+                            } else {
                                 Toast.makeText(getApplicationContext(), "empty photoPath, try again", Toast.LENGTH_SHORT).show();
                             }
                         } catch (Exception exception) {
@@ -179,6 +189,7 @@ public class Camera extends AppCompatActivity {
                     } else {
                         barcodeData = barcodes.valueAt(0).displayValue;
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
+
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
                         Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
@@ -223,7 +234,43 @@ public class Camera extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        if (material.equals("No materials found")) {
+            material = fetchProductFromFirebase(barcodeData);
+        }
         return material;
+    }
+
+    private String fetchProductFromFirebase(String barcode) {
+        String material = "No materials found";
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("Products").document(barcode);
+        docRef.get().addOnSuccessListener(documentSnapshot -> {
+            Product product = documentSnapshot.toObject(Product.class);
+            if (product != null) {
+                Singleton.getInstance().setProduct(product);
+                Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode());
+            }
+        });
+        if (Singleton.getInstance().getProduct() != null) {
+            material = createMaterialString();
+            Log.d("MyTag", material);
+        }
+        return material;
+    }
+
+    private String createMaterialString() {
+        if (Singleton.getInstance().getProduct().getMaterialList().size() == 1) {
+            return Singleton.getInstance().getProduct().getMaterialList().get(0);
+        } else {
+            StringBuilder material = new StringBuilder();
+            for (int i = 0; i < Singleton.getInstance().getProduct().getMaterialList().size(); i++) {
+                material.append(Singleton.getInstance().getProduct().getMaterialList().get(i));
+                if (i < Singleton.getInstance().getProduct().getMaterialList().size() - 1) {
+                    material.append(", ");
+                }
+            }
+            return material.toString();
+        }
     }
 
     private static Bitmap generateBarcodeFromString(String barcodeText) {
