@@ -1,5 +1,6 @@
 package com.GarDi;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -89,5 +90,11 @@ public class InfoActivity extends AppCompatActivity {
             } else {
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(getApplicationContext(), Camera.class);
+        startActivity(intent);
     }
 }
