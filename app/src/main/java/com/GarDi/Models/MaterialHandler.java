@@ -4,8 +4,8 @@ public abstract class MaterialHandler {
 
     private static String[][] materialsAndSorting = {{"plastic", "brännbart"}, {"glass", "glasförpackningar"}, {"plast", "brännbart"}, {"wood", "brännbart"}, {"metal", "deponi"}
     , {"plast", "brännbart"}, {"carton", "pappersförpackningar"}, {"pappersförpackningar", "pappersförpackningar"}, {"combustible", "brännbart"}, {"plastic packaging", "plastförpackningar"}
-    , {"tetra", "pappersförpackningar"}, {"phone", "elskrot"}};
-
+    , {"tetra", "pappersförpackningar"}, {"phone", "elskrot"}, {"geometric", "TestGeometric"} ,{"vector", "TestVector"}};
+//Added TestVector and TestGeometric for testing in Emulator
 
     public static String findSortingFromMaterial(String material) {
         for (int i = 0; i < materialsAndSorting.length; i++) {

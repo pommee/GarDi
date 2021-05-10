@@ -8,6 +8,8 @@ import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.GarDi.Models.MaterialHandler;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +54,9 @@ public class InfoActivity extends AppCompatActivity {
 
                 for (ClarifaiOutput<Concept> result : predictionResults) {
                     for (Concept datum : result.data()) {
-
-
-                        resList.add(String.format("%12s: %,.2f", datum.name(), datum.value()));
-
+                        if (!MaterialHandler.findSortingFromMaterial(datum.name()).matches("No sorting options found")) {
+                            resList.add(String.format("%12s: %,.2f", MaterialHandler.findSortingFromMaterial(datum.name()), datum.value()));
+                        }
                         /*
                         int i = 0;
                         while (i < categories.size()) {
@@ -67,9 +68,11 @@ public class InfoActivity extends AppCompatActivity {
                                 i++;
                             }
 
-                        }
-*/
+                        }*/
                     }
+                }
+                if (resList.size() == 0){
+                    resList.add("No sorting options found");
                 }
                 return true;
             }
