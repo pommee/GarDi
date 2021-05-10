@@ -23,10 +23,13 @@ class BarcodeScanned : AppCompatActivity() {
         setContentView(R.layout.activity_barcode_scanned)
         initID()
         scannedText!!.text = Singleton.getInstance().scannedText
-        if (Singleton.getInstance().itemName == "") {
-            itemName!!.text = "No name found"
+        if (Singleton.getInstance().product != null) {
+            itemName!!.text = Singleton.getInstance().product.productName
         } else {
-            itemName!!.text = Singleton.getInstance().itemName
+            if (Singleton.getInstance().itemName == "") {
+                itemName!!.text = "No name found"
+            }
+
         }
         barcodeImage!!.setImageBitmap(Singleton.getInstance().barcode)
         okButton!!.setOnClickListener {

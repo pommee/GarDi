@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
@@ -75,6 +76,7 @@ public class Camera extends AppCompatActivity {
         surfaceView = findViewById(R.id.cameraView);
         button = findViewById(R.id.cameraButton);
         barcodeScanned = false; // Default
+        Singleton.getInstance().setProduct(null);
         initialiseDetectorsAndSources();
     }
 
@@ -170,14 +172,15 @@ public class Camera extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                if (barcodes.size() != 0) {
+                if (barcodes.size() != 0 && !barcodeScanned) {
 
                     if (barcodes.valueAt(0).email != null) {
+                        barcodeScanned = true;
                         barcodeData = barcodes.valueAt(0).email.toString();
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
-                        Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
+                        retrieveMaterialFromBarcode(barcodeData);
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
                         } catch (IOException e) {
@@ -187,19 +190,22 @@ public class Camera extends AppCompatActivity {
                         startActivity(intent);
 
                     } else {
+                        barcodeScanned = true;
                         barcodeData = barcodes.valueAt(0).displayValue;
                         toneGen1.startTone(ToneGenerator.TONE_CDMA_PIP, 150);
 
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
-                        Singleton.getInstance().setMaterialOfProduct(retrieveMaterialFromBarcode(barcodeData));
+                        retrieveMaterialFromBarcode(barcodeData);
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
-                        startActivity(intent);
+                        if (Singleton.getInstance().getMaterialOfProduct() != null) {
+                            Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
+                            startActivity(intent);
+                        }
                     }
                 }
             }
@@ -207,8 +213,8 @@ public class Camera extends AppCompatActivity {
     }
 
 
-    private String retrieveMaterialFromBarcode(String barcodeData) {    // Takes the barcode and returns the materials of the product :)
-        String material = "No materials found";
+    private void retrieveMaterialFromBarcode(String barcodeData) {    // Takes the barcode and returns the materials of the product :)
+        Singleton.getInstance().setMaterialOfProduct("No materials found");
         String url = "https://world.openfoodfacts.org/api/v0/product/" + barcodeData + ".json";
 
         JSONParser parser = new JSONParser();
@@ -227,35 +233,31 @@ public class Camera extends AppCompatActivity {
                 if (jsonObject.get("product") != null) {
                     product = (JSONObject) jsonObject.get("product");
                     if (product.get("packaging") != null) { // If no packaging exists in DB
-                        material = product.get("packaging").toString();
+                        Singleton.getInstance().setMaterialOfProduct(product.get("packaging").toString());
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (material.equals("No materials found")) {
-            material = fetchProductFromFirebase(barcodeData);
+        if (Singleton.getInstance().getMaterialOfProduct().equals("No materials found")) {
+            Log.d("MyTag", "No material found in openfoodfactsDB");
+            fetchProductFromFirebase(barcodeData);
         }
-        return material;
     }
 
-    private String fetchProductFromFirebase(String barcode) {
-        String material = "No materials found";
+    private void fetchProductFromFirebase(String barcode) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("Products").document(barcode);
         docRef.get().addOnSuccessListener(documentSnapshot -> {
             Product product = documentSnapshot.toObject(Product.class);
             if (product != null) {
                 Singleton.getInstance().setProduct(product);
-                Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode());
+                Singleton.getInstance().setMaterialOfProduct(createMaterialString());
+                //Singleton.getInstance().setItemName(product.getProductName());
+                Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode() + "\n name: " + product.getProductName());
             }
         });
-        if (Singleton.getInstance().getProduct() != null) {
-            material = createMaterialString();
-            Log.d("MyTag", material);
-        }
-        return material;
     }
 
     private String createMaterialString() {

@@ -65,7 +65,7 @@ class AddProductToDB : AppCompatActivity() {
         }
     }
 
-    private fun storeProductToFirebase() {  // Currently writing null values to firebase
+    private fun storeProductToFirebase() {
         val db = FirebaseFirestore.getInstance()
 
         val product =
