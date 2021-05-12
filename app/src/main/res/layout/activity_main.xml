@@ -31,6 +31,12 @@
 
     </com.google.android.material.bottomappbar.BottomAppBar>
 
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="find nearest Recyclingcenters" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatButton"
         android:layout_width="wrap_content"
