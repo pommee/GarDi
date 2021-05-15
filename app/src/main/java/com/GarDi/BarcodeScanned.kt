@@ -8,7 +8,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.GarDi.Models.MaterialHandler
+import com.GarDi.Models.Product
 import com.GarDi.Models.Singleton
+import com.google.firebase.firestore.FirebaseFirestore
 
 class BarcodeScanned : AppCompatActivity() {
     private var scannedText: TextView? = null
@@ -23,14 +25,11 @@ class BarcodeScanned : AppCompatActivity() {
         setContentView(R.layout.activity_barcode_scanned)
         initID()
         scannedText!!.text = Singleton.getInstance().scannedText
-        if (Singleton.getInstance().product != null) {
-            itemName!!.text = Singleton.getInstance().product.productName
-        } else {
-            if (Singleton.getInstance().itemName == "") {
-                itemName!!.text = "No name found"
-            }
 
-        }
+        itemName!!.text = Singleton.getInstance().itemName
+
+
+
         barcodeImage!!.setImageBitmap(Singleton.getInstance().barcode)
         okButton!!.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -39,6 +38,23 @@ class BarcodeScanned : AppCompatActivity() {
         material!!.text = Singleton.getInstance().materialOfProduct
         if (Singleton.getInstance().materialOfProduct == "No materials found") {
             promptForAdding()
+        }else{
+            val db = FirebaseFirestore.getInstance()
+            val materialList = ArrayList<String>()
+            materialList.add(material!!.text.toString())
+            db.collection("Products").document(scannedText?.text.toString()).get()
+                .addOnSuccessListener { value ->
+                    if (value.exists()){
+                        var counter = value.get("timesSearched").toString().toInt()
+                        counter++
+                        val product = Product(scannedText!!.text.toString(), Singleton.getInstance().itemName, materialList, counter)
+                        db.collection("Products").document(scannedText?.text.toString()).set(product)
+                    }else{
+                        val product = Product(scannedText!!.text.toString(), Singleton.getInstance().itemName, materialList)
+                        db.collection("Products").document(scannedText?.text.toString()).set(product)
+                    }
+
+                }
         }
         sorting!!.text = "Sorting: \n" + getSortingAlternatives()
     }

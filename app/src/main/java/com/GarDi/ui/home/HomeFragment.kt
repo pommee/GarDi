@@ -1,16 +1,27 @@
 package com.GarDi.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Adapter
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.GarDi.Models.MaterialHandler
+import com.GarDi.Models.Product
 import com.GarDi.R
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import java.util.ArrayList
 
 class HomeFragment : Fragment() {
+    private  var searches = ArrayList<Product>()
+    lateinit var recycler : RecyclerView
 
     private lateinit var homeViewModel: HomeViewModel
 
@@ -19,13 +30,40 @@ class HomeFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        homeViewModel =
-                ViewModelProvider(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
-        homeViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        recycler = root.findViewById(R.id.recyclerViewStats)
+        initList()
         return root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+    }
+    fun initList(){
+        val db = FirebaseFirestore.getInstance()
+        db.collection("Products").orderBy("timesSearched", Query.Direction.DESCENDING).limit(3).get()
+            .addOnSuccessListener { result ->
+                for (product in result){
+                    searches.add(product.toObject(Product::class.java))
+                }
+                val adapter = RecyclerAdapter(searches)
+                if (recycler != null) {
+                    recycler.layoutManager = LinearLayoutManager(context)
+                }
+                if (recycler != null) {
+                    recycler.adapter = adapter
+                }
+                recycler?.adapter?.notifyDataSetChanged()
+                if (recycler != null) {
+                    Log.e("TAG", recycler.adapter?.itemCount.toString())
+                }
+
+                Log.e("TAG", searches.toString())
+            }
     }
 }
