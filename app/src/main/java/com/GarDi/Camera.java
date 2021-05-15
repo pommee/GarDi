@@ -181,11 +181,6 @@ public class Camera extends AppCompatActivity {
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
                         retrieveMaterialFromBarcode(barcodeData);
-                        try {
-                            Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                         Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
                         startActivity(intent);
 
@@ -197,11 +192,7 @@ public class Camera extends AppCompatActivity {
                         Singleton.getInstance().setScannedText(barcodeData);
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
                         retrieveMaterialFromBarcode(barcodeData);
-                        try {
-                            Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+
                         if (Singleton.getInstance().getMaterialOfProduct() != null) {
                             Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
                             startActivity(intent);
@@ -235,6 +226,15 @@ public class Camera extends AppCompatActivity {
                     if (product.get("packaging") != null) { // If no packaging exists in DB
                         Singleton.getInstance().setMaterialOfProduct(product.get("packaging").toString());
                     }
+                    if (product.get("product_name") != null){
+                        Singleton.getInstance().setItemName(product.get("product_name").toString());
+                    }else {
+                        try {
+                            Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
@@ -254,7 +254,7 @@ public class Camera extends AppCompatActivity {
             if (product != null) {
                 Singleton.getInstance().setProduct(product);
                 Singleton.getInstance().setMaterialOfProduct(createMaterialString());
-                //Singleton.getInstance().setItemName(product.getProductName());
+                Singleton.getInstance().setItemName(product.getProductName());
                 Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode() + "\n name: " + product.getProductName());
             }
         });
