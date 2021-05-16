@@ -26,7 +26,9 @@ class BarcodeScanned : AppCompatActivity() {
         if (Singleton.getInstance().product != null) {
             itemName!!.text = Singleton.getInstance().product.productName
         } else {
-            if (Singleton.getInstance().itemName == "") {
+            if (Singleton.getInstance().itemName != "") {
+                itemName!!.text = Singleton.getInstance().itemName
+            } else {
                 itemName!!.text = "No name found"
             }
 
