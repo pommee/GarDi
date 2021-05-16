@@ -25,15 +25,6 @@ class BarcodeScanned : AppCompatActivity() {
         setContentView(R.layout.activity_barcode_scanned)
         initID()
         scannedText!!.text = Singleton.getInstance().scannedText
-        if (Singleton.getInstance().product != null) {
-            itemName!!.text = Singleton.getInstance().product.productName
-        } else {
-            if (Singleton.getInstance().itemName != "") {
-                itemName!!.text = Singleton.getInstance().itemName
-            } else {
-                itemName!!.text = "No name found"
-            }
-
 
         itemName!!.text = Singleton.getInstance().itemName
 
