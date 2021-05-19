@@ -3,7 +3,6 @@ package com.GarDi;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -27,6 +26,7 @@ public class InfoActivity extends AppCompatActivity {
     String photoPath = null;
     ArrayAdapter<String> arrayAdapter = null;
     List<String> categories = new ArrayList<String>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,12 +35,26 @@ public class InfoActivity extends AppCompatActivity {
         categories.add("vector");
         categories.add("design");
         photoPath = (String) getIntent().getSerializableExtra("photoPath");
-        ListView lv = (ListView) findViewById(R.id.list_view);
-        arrayAdapter= new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,resList);
+        ListView lv = findViewById(R.id.list_view);
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, resList);
         lv.setAdapter(arrayAdapter);
         new ClarifaiTask().execute(new File(photoPath));
 
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(getApplicationContext(), Camera.class);
+        startActivity(intent);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+    }
+
     private class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
         protected Boolean doInBackground(File... images) {
             resList.clear();
@@ -50,7 +64,7 @@ public class InfoActivity extends AppCompatActivity {
 // For each photo we pass, send it off to Clarifai
             for (File image : images) {
                 predictionResults = client.getDefaultModels().generalModel().predict()
-                            .withInputs(ClarifaiInput.forImage(image)).executeSync().get();
+                        .withInputs(ClarifaiInput.forImage(image)).executeSync().get();
 // Check if Clarifai thinks the photo contains the object we are looking for
 
                 for (ClarifaiOutput<Concept> result : predictionResults) {
@@ -58,21 +72,9 @@ public class InfoActivity extends AppCompatActivity {
                         if (!MaterialHandler.findSortingFromMaterial(datum.name()).matches("No sorting options found")) {
                             resList.add(String.format("%12s: %,.2f", MaterialHandler.findSortingFromMaterial(datum.name()), datum.value()));
                         }
-                        /*
-                        int i = 0;
-                        while (i < categories.size()) {
-                            Log.d("myTag", datum.name() + "" + categories.get(i));
-                            if (datum.name().matches(categories.get(i))) {
-
-                                i++;
-                            } else {
-                                i++;
-                            }
-
-                        }*/
                     }
                 }
-                if (resList.size() == 0){
+                if (resList.size() == 0) {
                     resList.add("No sorting options found");
                 }
                 return true;
@@ -90,11 +92,5 @@ public class InfoActivity extends AppCompatActivity {
             } else {
             }
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(getApplicationContext(), Camera.class);
-        startActivity(intent);
     }
 }

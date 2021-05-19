@@ -70,7 +70,10 @@ class AddProductToDB : AppCompatActivity() {
 
         val product =
             Product(scannedText!!.text.toString(), productName!!.text.toString(), materialList)
-        Log.d("MyTag", product.barcode + " " + product.productName + " " + product.materialList.toString())
+        Log.d(
+            "MyTag",
+            product.barcode + " " + product.productName + " " + product.materialList.toString()
+        )
         db.collection("Products").document(scannedText!!.text.toString()).set(product)
             .addOnSuccessListener { documentReference ->
                 Log.d(

@@ -2,8 +2,6 @@ package com.GarDi.Models;
 
 import android.graphics.Bitmap;
 
-import java.util.ArrayList;
-
 public class Singleton {
 
     private static Singleton instance = null;
@@ -21,16 +19,16 @@ public class Singleton {
         return (instance);
     }
 
+    public static void setInstance(Singleton instance) {
+        Singleton.instance = instance;
+    }
+
     public String getItemImage() {
         return itemImage;
     }
 
     public void setItemImage(String itemImage) {
         this.itemImage = itemImage;
-    }
-
-    public static void setInstance(Singleton instance) {
-        Singleton.instance = instance;
     }
 
     public String getScannedText() {

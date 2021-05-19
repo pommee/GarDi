@@ -19,6 +19,6 @@ class Product {
         this.timesSearched = timesSearched
     }
 
-    constructor() {}
+    constructor()
 
 }

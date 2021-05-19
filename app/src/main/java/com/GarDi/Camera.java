@@ -9,31 +9,24 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.GarDi.Models.Product;
 import com.GarDi.Models.RequestJSoup;
 import com.GarDi.Models.Singleton;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -52,21 +45,40 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 
 public class Camera extends AppCompatActivity {
 
+    private static final int REQUEST_CAMERA_PERMISSION = 201;
+    public String photoPath = null;
     private SurfaceView surfaceView;
     private BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
-    private static final int REQUEST_CAMERA_PERMISSION = 201;
     private ToneGenerator toneGen1;
     private String barcodeData;
     private FloatingActionButton button;
-    public String photoPath = null;
     private boolean barcodeScanned;
 
+    private static Bitmap generateBarcodeFromString(String barcodeText) {
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            BitMatrix bitMatrix = multiFormatWriter.encode(barcodeText, BarcodeFormat.CODABAR, getScreenWidth(), 300);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            return bitmap;
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,16 +205,11 @@ public class Camera extends AppCompatActivity {
                         Singleton.getInstance().setBarcode(generateBarcodeFromString(barcodeData));
                         retrieveMaterialFromBarcode(barcodeData);
 
-                        if (Singleton.getInstance().getMaterialOfProduct() != null) {
-                            Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
-                            startActivity(intent);
-                        }
                     }
                 }
             }
         });
     }
-
 
     private void retrieveMaterialFromBarcode(String barcodeData) {    // Takes the barcode and returns the materials of the product :)
         Singleton.getInstance().setMaterialOfProduct("No materials found");
@@ -226,9 +233,9 @@ public class Camera extends AppCompatActivity {
                     if (product.get("packaging") != null) { // If no packaging exists in DB
                         Singleton.getInstance().setMaterialOfProduct(product.get("packaging").toString());
                     }
-                    if (product.get("product_name") != null){
+                    if (product.get("product_name") != null) {
                         Singleton.getInstance().setItemName(product.get("product_name").toString());
-                    }else {
+                    } else {
                         try {
                             Singleton.getInstance().setItemName(RequestJSoup.getSearchResultFromGoogle(barcodeData));
                         } catch (IOException e) {
@@ -243,10 +250,14 @@ public class Camera extends AppCompatActivity {
         if (Singleton.getInstance().getMaterialOfProduct().equals("No materials found")) {
             Log.d("MyTag", "No material found in openfoodfactsDB");
             fetchProductFromFirebase(barcodeData);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
+            startActivity(intent);
         }
     }
 
     private void fetchProductFromFirebase(String barcode) {
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("Products").document(barcode);
         docRef.get().addOnSuccessListener(documentSnapshot -> {
@@ -255,7 +266,9 @@ public class Camera extends AppCompatActivity {
                 Singleton.getInstance().setProduct(product);
                 Singleton.getInstance().setMaterialOfProduct(createMaterialString());
                 Singleton.getInstance().setItemName(product.getProductName());
-                Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode() + "\n name: " + product.getProductName());
+                Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode() + "\n material: " + product.getMaterialList().toString());
+                Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
+                startActivity(intent);
             }
         });
     }
@@ -274,28 +287,6 @@ public class Camera extends AppCompatActivity {
             return material.toString();
         }
     }
-
-    private static Bitmap generateBarcodeFromString(String barcodeText) {
-        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
-        try {
-            BitMatrix bitMatrix = multiFormatWriter.encode(barcodeText, BarcodeFormat.CODABAR, getScreenWidth(), 300);
-            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
-            return bitmap;
-        } catch (WriterException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
-    }
-
 
     @Override
     protected void onPause() {

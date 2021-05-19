@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.GarDi.Models.MaterialHandler
-import com.GarDi.Models.Product
 import com.GarDi.Models.Singleton
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -38,20 +37,18 @@ class BarcodeScanned : AppCompatActivity() {
         material!!.text = Singleton.getInstance().materialOfProduct
         if (Singleton.getInstance().materialOfProduct == "No materials found") {
             promptForAdding()
-        }else{
+        } else {
             val db = FirebaseFirestore.getInstance()
-            val materialList = ArrayList<String>()
-            materialList.add(material!!.text.toString())
             db.collection("Products").document(scannedText?.text.toString()).get()
                 .addOnSuccessListener { value ->
-                    if (value.exists()){
-                        var counter = value.get("timesSearched").toString().toInt()
-                        counter++
-                        val product = Product(scannedText!!.text.toString(), Singleton.getInstance().itemName, materialList, counter)
-                        db.collection("Products").document(scannedText?.text.toString()).set(product)
-                    }else{
-                        val product = Product(scannedText!!.text.toString(), Singleton.getInstance().itemName, materialList)
-                        db.collection("Products").document(scannedText?.text.toString()).set(product)
+                    if (value.exists()) {
+                        Singleton.getInstance().product.timesSearched++
+                        db.collection("Products").document(scannedText?.text.toString())
+                            .set(Singleton.getInstance().product)
+                    } else {
+                        Singleton.getInstance().product.timesSearched++
+                        db.collection("Products").document(scannedText?.text.toString())
+                            .set(Singleton.getInstance().product)
                     }
 
                 }
@@ -59,8 +56,8 @@ class BarcodeScanned : AppCompatActivity() {
         sorting!!.text = "Sorting: \n" + getSortingAlternatives()
     }
 
-    private fun getSortingAlternatives() : String {
-        var result = "";
+    private fun getSortingAlternatives(): String {
+        var result = ""
         val materials = Singleton.getInstance().materialOfProduct.split(", ")
         for (item in materials) {
             result += MaterialHandler.findSortingFromMaterial(item)
@@ -81,13 +78,17 @@ class BarcodeScanned : AppCompatActivity() {
     private fun promptForAdding() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage(
-            "Do you wish to add the barcode: " + Singleton.getInstance().scannedText + " to the database?").setCancelable(false)
+            "Do you wish to add the barcode: " + Singleton.getInstance().scannedText + " to the database?"
+        ).setCancelable(false)
             .setPositiveButton(
-                "Yes") { dialog, which ->
+                "Yes"
+            ) { dialog, which ->
                 val intent = Intent(applicationContext, AddProductToDB::class.java)
-                startActivity(intent) }
+                startActivity(intent)
+            }
             .setNegativeButton(
-                "No") { dialog, which -> dialog.cancel() }
+                "No"
+            ) { dialog, which -> dialog.cancel() }
 
         val alert = builder.create()
         alert.setTitle("Product not found!")

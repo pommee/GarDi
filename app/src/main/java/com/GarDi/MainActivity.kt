@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
     private val navListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -35,7 +36,8 @@ class MainActivity : AppCompatActivity() {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)))
                 }
                 R.id.navigation_home -> {
-                    supportFragmentManager.beginTransaction().replace(R.id.nav_host_fragment, HomeFragment()).commit()
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.nav_host_fragment, HomeFragment()).commit()
                 }
             }
             true

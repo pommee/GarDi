@@ -5,29 +5,24 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Adapter
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.GarDi.Models.MaterialHandler
 import com.GarDi.Models.Product
 import com.GarDi.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import java.util.ArrayList
+import java.util.*
 
 class HomeFragment : Fragment() {
-    private  var searches = ArrayList<Product>()
-    lateinit var recycler : RecyclerView
+    private var searches = ArrayList<Product>()
+    lateinit var recycler: RecyclerView
 
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
 
         val root = inflater.inflate(R.layout.fragment_home, container, false)
@@ -36,19 +31,12 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
-    fun initList(){
+    fun initList() {
         val db = FirebaseFirestore.getInstance()
-        db.collection("Products").orderBy("timesSearched", Query.Direction.DESCENDING).limit(3).get()
+        db.collection("Products").orderBy("timesSearched", Query.Direction.DESCENDING).limit(3)
+            .get()
             .addOnSuccessListener { result ->
-                for (product in result){
+                for (product in result) {
                     searches.add(product.toObject(Product::class.java))
                 }
                 val adapter = RecyclerAdapter(searches)
@@ -58,7 +46,7 @@ class HomeFragment : Fragment() {
                 if (recycler != null) {
                     recycler.adapter = adapter
                 }
-                recycler?.adapter?.notifyDataSetChanged()
+                recycler.adapter?.notifyDataSetChanged()
                 if (recycler != null) {
                     Log.e("TAG", recycler.adapter?.itemCount.toString())
                 }
