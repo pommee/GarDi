@@ -2,7 +2,7 @@ package com.GarDi.Models;
 
 public abstract class MaterialHandler {
 
-    private static final String[][] materialsAndSorting = {{"plastic", "brännbart"}, {"glass", "glasförpackningar"}, {"plast", "brännbart"}, {"wood", "brännbart"}, {"metal", "deponi"}
+    private static final String[][] materialsAndSorting = {{"plastic", "brännbart"}, {"glass", "glasförpackningar"}, {"plast", "brännbart"}, {"wood", "brännbart"}, {"metal", "metalförpackningar"}
             , {"plast", "brännbart"}, {"carton", "pappersförpackningar"}, {"pappersförpackningar", "pappersförpackningar"}, {"combustible", "brännbart"}, {"plastic packaging", "plastförpackningar"}
             , {"tetra", "pappersförpackningar"}, {"phone", "elskrot"}, {"paper packaging", "pappersförpackningar"}};
 

@@ -267,9 +267,9 @@ public class Camera extends AppCompatActivity {
                 Singleton.getInstance().setMaterialOfProduct(createMaterialString());
                 Singleton.getInstance().setItemName(product.getProductName());
                 Log.d("MyTag", "DocumentSnapshot data: " + product.getBarcode() + "\n material: " + product.getMaterialList().toString());
-                Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
-                startActivity(intent);
             }
+            Intent intent = new Intent(getApplicationContext(), BarcodeScanned.class);
+            startActivity(intent);
         });
     }
 
